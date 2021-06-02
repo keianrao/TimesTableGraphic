@@ -18,14 +18,14 @@
 
 //  Parameters  //  \\  //  \\  //  \\  //  \\  //  \\
 
-const FPS = 15;
+const FPS = 2;
 
 const MAJOR_VERTEX_SIZE = 2.5;
 const MINOR_VERTEX_SIZE = 1.5;
 
 const VERTEX_COUNT = 100;
 const INITIAL_MULTIPLIER = 2;
-const MULTIPLIER_INCREMENT = 0.05;
+const MULTIPLIER_INCREMENT = 0.5;
 
 /*
 * I've set the FPS to a safer value, to avoid hanging any computers.
