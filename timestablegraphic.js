@@ -86,16 +86,16 @@ function redraw() {
 	);
 	
 	const TAU = Math.PI * 2;
-	var slice = TAU / VERTEX_COUNT;
+	const SLICE = TAU / VERTEX_COUNT;
 	var r = (3 * h) / 8;
 	
-	for (var modNumber = 1; modNumber <= VERTEX_COUNT; ++modNumber) {
-		var angle = (modNumber - 1) * slice;
+	for (var modNumber = 0; modNumber < VERTEX_COUNT; ++modNumber) {
+		var angle = modNumber * SLICE;
 		var x = cx - (r * Math.cos(angle));
 		var y = cy - (r * Math.sin(angle));
 		
 		var nextModNumber = multiplier * modNumber;
-		var nextAngle = (nextModNumber - 1) * slice;
+		var nextAngle = nextModNumber * SLICE;
 		var nx = cx - (r * Math.cos(nextAngle));
 		var ny = cy - (r * Math.sin(nextAngle));
 		
