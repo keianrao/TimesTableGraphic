@@ -48,13 +48,9 @@ console.log("Initialising.");
 const view = document.getElementById("view");
 console.assert(view, "Parent HTML document not of expected structure!");
 
-var vertexCount;
 var multiplier;
 
-var vertices;
-
 if (view != null) {
-	vertexCount = VERTEX_COUNT;
 	multiplier = INITIAL_MULTIPLIER;
 
 	redraw();
@@ -90,10 +86,10 @@ function redraw() {
 	);
 	
 	const TAU = Math.PI * 2;
-	var slice = TAU / vertexCount;
+	var slice = TAU / VERTEX_COUNT;
 	var r = (3 * h) / 8;
 	
-	for (var modNumber = 1; modNumber <= vertexCount; ++modNumber) {
+	for (var modNumber = 1; modNumber <= VERTEX_COUNT; ++modNumber) {
 		var angle = (modNumber - 1) * slice;
 		var x = cx - (r * Math.cos(angle));
 		var y = cy - (r * Math.sin(angle));
