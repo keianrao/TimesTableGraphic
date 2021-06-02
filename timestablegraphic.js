@@ -32,12 +32,12 @@ const MULTIPLIER_INCREMENT = 0.5;
 * It's still illustrative, with the high multiplier increment.
 *
 * If you know your computer can handle it, you can increase the FPS
-* (and decrease MULTIPLIER_INCREMENT to match). If it runs okay, but
-* stutters, that's the fault of my programming.
+* (and decrease MULTIPLIER_INCREMENT to match).
 *
-* If there is a memory leak, do tell me. I looked at `top` for a minute,
-* and I've ran it for a few minutes to feel its effects on my browser.
-* It appears stable..
+* If it runs okay, but stutters, that's the fault of my programming.
+* Also, if there is a memory leak, do tell me.
+* I looked at `top` for a minute, and I've ran it for a few minutes
+* to feel its effects on my browser. It appears stable..
 */
 
 
@@ -60,7 +60,9 @@ if (view != null) {
 	redraw();
 	
 	window.addEventListener("resize", redraw);
-	window.setInterval(function () {
+	
+	var animate = MULTIPLIER_INCREMENT != 0;
+	if (animate) window.setInterval(function () {
 		multiplier += MULTIPLIER_INCREMENT;
 		redraw();
 		// Yes, this is incredibly costly of an operation.
@@ -80,6 +82,12 @@ function redraw() {
 	var h = view.clientHeight;
 	var cx = w / 2;
 	var cy = h / 2;
+	
+	var svgMultiplierLabel = addText(
+		(9 * w) / 10,
+		(9 * h) / 10,
+		("" + multiplier).substring(0, 6)
+	);
 	
 	const TAU = Math.PI * 2;
 	var slice = TAU / vertexCount;
@@ -137,11 +145,16 @@ function addLine(x1, y1, x2, y2) {
 
 function addTitle(parentElem, text) {
 	var elem = createSVGElement("title");
-	elem.innerHTML = text;
+	elem.textContent = text;
 	parentElem.appendChild(elem);
 	return elem;
 }
 
 function addText(x, y, text) {
-	// Not implemented yet
+	var elem = createSVGElement("text");
+	elem.textContent = text;
+	elem.setAttribute("x", x);
+	elem.setAttribute("y", y);
+	view.appendChild(elem);
+	return elem;
 }
