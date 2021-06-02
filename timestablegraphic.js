@@ -1,6 +1,6 @@
 /*
 * TimesTableGraphic - math graphics demo
-* ©2020 Keian Rao <keian.rao@gmail.com>
+* ©2021 Keian Rao <keian.rao@gmail.com>
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,32 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+//  Parameters  //  \\  //  \\  //  \\  //  \\  //  \\
+
+const FPS = 15;
+
+const MAJOR_VERTEX_SIZE = 2.5;
+const MINOR_VERTEX_SIZE = 1.5;
+
+const VERTEX_COUNT = 100;
+const INITIAL_MULTIPLIER = 2;
+const MULTIPLIER_INCREMENT = 0.05;
+
+/*
+* I've set the FPS to a safer value, to avoid hanging any computers.
+* It's still illustrative, with the high multiplier increment.
+*
+* If you know your computer can handle it, you can increase the FPS
+* (and decrease MULTIPLIER_INCREMENT to match). If it runs okay, but
+* stutters, that's the fault of my programming.
+*
+* If there is a memory leak, do tell me. I looked at `top` for a minute,
+* and I've ran it for a few minutes to feel its effects on my browser.
+* It appears stable..
+*/
+
+
+//  Startup     //  \\  //  \\  //  \\  //  \\  //  \\
 
 console.log("Initialising.");
 
@@ -28,40 +54,24 @@ var multiplier;
 var vertices;
 
 if (view != null) {
-	vertexCount = 100;
-	multiplier = 2;
-	reevaluate();
+	vertexCount = VERTEX_COUNT;
+	multiplier = INITIAL_MULTIPLIER;
 
 	redraw();
 	
 	window.addEventListener("resize", redraw);
+	window.setInterval(function () {
+		multiplier += MULTIPLIER_INCREMENT;
+		redraw();
+		// Yes, this is incredibly costly of an operation.
+		// This removes a lot of SVG nodes then regenerates them.
+	}, 1000 / FPS);
 	
 	console.log("Finished initialising.");
 }
 
 
 //  Subroutines     \\  //  \\  //  \\  //  \\  //  \\
-
-function reevaluate() {
-	vertices = [];
-	
-	const TAU = Math.PI * 2;
-	var slice = TAU / vertexCount;	
-	for (var vertexIndex = 1; vertexIndex <= vertexCount; ++vertexIndex) {
-		var vertex = {
-			modNumber: vertexIndex - 1,
-			angle: (vertexIndex - 1) * slice,
-			nextModNumber: null
-		};
-		vertices.push(vertex);
-	}
-	
-	// Okay, let's multiply and fill the edges.
-	for (var vertex of vertices) {
-		vertex.nextModNumber = (multiplier * vertex.modNumber) % vertexCount;
-	}
-	// We can inline this above, but.
-}
 
 function redraw() {
 	view.replaceChildren();
@@ -71,59 +81,31 @@ function redraw() {
 	var cx = w / 2;
 	var cy = h / 2;
 	
+	const TAU = Math.PI * 2;
+	var slice = TAU / vertexCount;
 	var r = (3 * h) / 8;
-	for (var vertex of vertices) {
-		var x = cx - (r * Math.cos(vertex.angle));
-		var y = cy - (r * Math.sin(vertex.angle));
+	
+	for (var modNumber = 1; modNumber <= vertexCount; ++modNumber) {
+		var angle = (modNumber - 1) * slice;
+		var x = cx - (r * Math.cos(angle));
+		var y = cy - (r * Math.sin(angle));
 		
-		var nextVertex = vertexForModNumber(vertex.nextModNumber);
-		// Deja vu..
-		console.assert(nextVertex != null);
-		var nx = cx - (r * Math.cos(nextVertex.angle));
-		var ny = cy - (r * Math.sin(nextVertex.angle));
+		var nextModNumber = multiplier * modNumber;
+		var nextAngle = (nextModNumber - 1) * slice;
+		var nx = cx - (r * Math.cos(nextAngle));
+		var ny = cy - (r * Math.sin(nextAngle));
 		
-		var svgVertex = addCircle(x, y, 5);
-		addTitle(
-			svgVertex, 
-			"Mod number: " + vertex.modNumber
-			+ "\nConnected to mod number: " + vertex.nextModNumber
-		);
-		
+		var svgStartingVertex = addCircle(x, y, MAJOR_VERTEX_SIZE);
+		var svgEndingVertex = addCircle(nx, ny, MINOR_VERTEX_SIZE);
 		var svgEdge = addLine(x, y, nx, ny);
+		/*
+		addTitle(
+			svgStartingVertex, 
+			"Mod number: " + modNumber
+			+ "\nConnected to mod number: " + nextModNumber
+		);
+		*/
 	}
-}
-
-function vertexForModNumber(modNumber) {
-	if (vertices.length == 0) return null;
-	
-	var lastClosestVertex;
-	var diffFromLastClosestVertex;
-	{
-		lastClosestVertex = vertices[0];
-		diffFromLastClosestVertex = lastClosestVertex.modNumber - modNumber;
-	}
-	for (var vertex of vertices) {
-		var diff = Math.abs(vertex.modNumber - modNumber);
-		
-		if (diff == 0) return vertex;
-		
-		if (diff < diffFromLastClosestVertex) {
-			lastClosestVertex = vertex;
-			diffFromLastClosestVertex = diff;
-			continue;
-		}
-	}
-	return lastClosestVertex;
-	
-	// I'm trying to get the closest vertex rather than the exact vertex with
-	// that mod number, because, I'd like to support fractional multipliers.
-	// In regards to that, this code isn't working right now.
-	//
-	// An alternative is to not draw lines to existent vertices, but rather
-	// to just return an angle corresponding to that mod number, so the
-	// source vertex draws to the point on the circle for that angle.
-	// Similarly we can drop vertex objects altogether, just loop over
-	// angles in #redraw.
 }
 
 
@@ -158,4 +140,8 @@ function addTitle(parentElem, text) {
 	elem.innerHTML = text;
 	parentElem.appendChild(elem);
 	return elem;
+}
+
+function addText(x, y, text) {
+	// Not implemented yet
 }
